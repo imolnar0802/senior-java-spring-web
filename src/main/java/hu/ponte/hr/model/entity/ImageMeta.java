@@ -37,6 +37,6 @@ public class ImageMeta
 	@Column(name = "size")
 	private long size;
 
-	@Column(name = "digitalSign", length = 512000)
+	@Column(name = "digitalSign", length = 1024)
 	private String digitalSign;
 }
