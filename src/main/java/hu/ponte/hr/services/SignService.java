@@ -12,12 +12,15 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class SignService {
 
     private PublicKey loadPubKey() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        log.debug("Load public key");
         var publicKeyBytes = getClass().getResourceAsStream("/config/keys/key.pub").readAllBytes();
         var pubKeyFactory = KeyFactory.getInstance("RSA");
 
@@ -25,6 +28,7 @@ public class SignService {
     }
 
     private PrivateKey loadPrivKey() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        log.debug("Load private key");
         var privKeyBytes = getClass().getResourceAsStream("/config/keys/key.private").readAllBytes();
         var privKeyFactory = KeyFactory.getInstance("RSA");
 
@@ -32,12 +36,15 @@ public class SignService {
     }
 
     public String sign(String data) throws Exception {
+        log.debug("Start signing");
         Signature privateSignature = Signature.getInstance("SHA256withRSA");
         privateSignature.initSign(loadPrivKey());
         privateSignature.update(data.getBytes());
         byte[] signature = privateSignature.sign();
+        log.debug("Finish signing");
 
         if(verify(signature, data)) {
+            log.info("Signature and verification are successful");
             return Base64.getEncoder().encodeToString(signature);
         } else {
             throw new SignatureException();
@@ -45,9 +52,11 @@ public class SignService {
     }
 
     private boolean verify(byte[] signature, String data) throws Exception {
+        log.debug("Start verifying");
         Signature sign = Signature.getInstance("SHA256withRSA");
         sign.initVerify(loadPubKey());
         sign.update(data.getBytes());
+        log.debug("Finish verifying");
         return sign.verify(signature);
     }
 }
