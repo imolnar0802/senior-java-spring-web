@@ -49,7 +49,7 @@ public class ImageStore {
         try {
             ImageMeta imageMeta = ImageMeta.builder()
                     .name(file.getName())
-                    .digitalSign(signService.sign(new String(file.getBytes())))
+                    .digitalSign(signService.sign(file.getBytes()))
                     .size(file.getSize())
                     .mimeType(file.getContentType())
                     .build();

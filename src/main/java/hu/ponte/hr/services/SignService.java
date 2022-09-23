@@ -35,11 +35,11 @@ public class SignService {
         return privKeyFactory.generatePrivate(new PKCS8EncodedKeySpec(privKeyBytes));
     }
 
-    public String sign(String data) throws Exception {
+    public String sign(byte[] data) throws Exception {
         log.debug("Start signing");
         Signature privateSignature = Signature.getInstance("SHA256withRSA");
         privateSignature.initSign(loadPrivKey());
-        privateSignature.update(data.getBytes());
+        privateSignature.update(data);
         byte[] signature = privateSignature.sign();
         log.debug("Finish signing");
 
@@ -51,11 +51,11 @@ public class SignService {
         }
     }
 
-    private boolean verify(byte[] signature, String data) throws Exception {
+    private boolean verify(byte[] signature, byte[] data) throws Exception {
         log.debug("Start verifying");
         Signature sign = Signature.getInstance("SHA256withRSA");
         sign.initVerify(loadPubKey());
-        sign.update(data.getBytes());
+        sign.update(data);
         log.debug("Finish verifying");
         return sign.verify(signature);
     }
