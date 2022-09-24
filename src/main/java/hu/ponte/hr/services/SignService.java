@@ -12,32 +12,39 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
+import hu.ponte.hr.config.KeysConfig;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class SignService {
+
+    private KeysConfig keysConfig;
+    private static final String KEYFACTORY_ALGORITHM = "RSA";
+    private static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
 
     private PublicKey loadPubKey() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         log.debug("Load public key");
-        var publicKeyBytes = getClass().getResourceAsStream("/config/keys/key.pub").readAllBytes();
-        var pubKeyFactory = KeyFactory.getInstance("RSA");
+        var publicKeyBytes = getClass().getResourceAsStream(keysConfig.getPublicKeyPath()).readAllBytes();
+        var pubKeyFactory = KeyFactory.getInstance(KEYFACTORY_ALGORITHM);
 
         return pubKeyFactory.generatePublic(new X509EncodedKeySpec(publicKeyBytes));
     }
 
     private PrivateKey loadPrivKey() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         log.debug("Load private key");
-        var privKeyBytes = getClass().getResourceAsStream("/config/keys/key.private").readAllBytes();
-        var privKeyFactory = KeyFactory.getInstance("RSA");
+        var privKeyBytes = getClass().getResourceAsStream(keysConfig.getPrivateKeyPath()).readAllBytes();
+        var privKeyFactory = KeyFactory.getInstance(KEYFACTORY_ALGORITHM);
 
         return privKeyFactory.generatePrivate(new PKCS8EncodedKeySpec(privKeyBytes));
     }
 
     public String sign(byte[] data) throws Exception {
         log.debug("Start signing");
-        Signature privateSignature = Signature.getInstance("SHA256withRSA");
+        var privateSignature = Signature.getInstance(SIGNATURE_ALGORITHM);
         privateSignature.initSign(loadPrivKey());
         privateSignature.update(data);
         byte[] signature = privateSignature.sign();
@@ -53,7 +60,7 @@ public class SignService {
 
     private boolean verify(byte[] signature, byte[] data) throws Exception {
         log.debug("Start verifying");
-        Signature sign = Signature.getInstance("SHA256withRSA");
+        var sign = Signature.getInstance(SIGNATURE_ALGORITHM);
         sign.initVerify(loadPubKey());
         sign.update(data);
         log.debug("Finish verifying");
