@@ -1,10 +1,15 @@
-package hu.ponte.hr;
+package hu.ponte.hr.services;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -15,6 +20,8 @@ import java.util.Map;
 @SpringBootTest()
 public class SignTest
 {
+
+	private final static String IMAGES_PATH = "src/test/resources/images/";
 	Map<String, String> files = new LinkedHashMap<String, String>() {
 		{
 			put("cat.jpg","XYZ+wXKNd3Hpnjxy4vIbBQVD7q7i0t0r9tzpmf1KmyZAEUvpfV8AKQlL7us66rvd6eBzFlSaq5HGVZX2DYTxX1C5fJlh3T3QkVn2zKOfPHDWWItdXkrccCHVR5HFrpGuLGk7j7XKORIIM+DwZKqymHYzehRvDpqCGgZ2L1Q6C6wjuV4drdOTHps63XW6RHNsU18wHydqetJT6ovh0a8Zul9yvAyZeE4HW7cPOkFCgll5EZYZz2iH5Sw1NBNhDNwN2KOxrM4BXNUkz9TMeekjqdOyyWvCqVmr5EgssJe7FAwcYEzznZV96LDkiYQdnBTO8jjN25wlnINvPrgx9dN/Xg==");
@@ -23,10 +30,22 @@ public class SignTest
 		}
 	};
 
+	@Autowired
+	SignService signService;
+
 	@Test
 	public void test_01() {
 
+		files.forEach((k, v) -> {
+			try {
+				byte[] content = Files.readAllBytes(Paths.get(IMAGES_PATH + k));
+				assertEquals(v, signService.sign(content), "Test files signature");
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		});
 	}
+
 
 
 }
