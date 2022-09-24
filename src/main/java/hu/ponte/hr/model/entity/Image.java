@@ -30,6 +30,6 @@ public class Image {
     @JoinColumn(name = "imageMeta")
     ImageMeta imageMeta;
 
-    @Column(name = "content", length = 255000)
+    @Column(name = "content", length = 1250000)
     private byte[] content;
 }
